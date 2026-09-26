@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#9a7165">
+<link rel="manifest" href="manifest.json">
+<title>てちょっと</title>
+<style>
+:root{
+ --brown:#8f675b;--brown-dark:#745247;--bg:#f4e3df;--paper:#fffaf7;
+ --line:#dfc9c2;--muted:#a4877e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#604d46;background:var(--bg)}
+.app{height:100dvh;max-width:600px;margin:auto;background:var(--paper);display:flex;flex-direction:column}
+header{padding:22px 18px 13px;background:#fffaf7;display:flex;justify-content:space-between;align-items:end}
+.logo{font-size:25px;font-weight:700;color:var(--brown)}
+.sub{font-size:11px;color:var(--muted);margin-top:2px}
+.count{font-size:11px;color:var(--muted)}
+.board{position:relative;flex:1;overflow:hidden;background:
+ radial-gradient(#ead8d3 0.8px,transparent .8px);background-size:16px 16px;
+ background-color:#f8eeeb}
+.sticky{position:absolute;width:145px;min-height:115px;padding:15px 13px 13px;
+ border:0;box-shadow:2px 4px 10px #7b5b541f;touch-action:none;
+ color:#5e4b46;font-size:14px;line-height:1.55;overflow:hidden}
+.sticky::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+ width:42px;height:8px;background:#ffffff55}
+.sticky textarea{width:100%;height:90px;border:0;background:transparent;resize:none;outline:none;
+ color:inherit;font:inherit;line-height:1.55;padding:0;margin-top:4px}
+.sticky .del{position:absolute;right:5px;top:4px;border:0;background:transparent;color:#876d65;font-size:14px;padding:2px}
+.sticky .rotate{position:absolute;right:6px;bottom:5px;border:0;background:transparent;color:#876d65;font-size:12px}
+.palette{position:absolute;left:12px;right:12px;bottom:12px;padding:10px;
+ background:#fffaf7ee;border:1px solid #ead8d2;border-radius:20px;display:flex;gap:8px;
+ align-items:center;justify-content:center;box-shadow:0 4px 16px #72564b18;backdrop-filter:blur(8px)}
+.add{width:48px;height:48px;border:0;border-radius:50%;background:var(--brown);color:#fff;font-size:25px;box-shadow:0 4px 10px #75524735}
+.swatch{width:31px;height:31px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 5px #6d51492b}
+.swatch:active{transform:scale(.9)}
+.info{font-size:11px;color:var(--muted);margin-right:3px}
+.modal{position:fixed;inset:0;background:#0004;display:none;align-items:flex-end;z-index:20}
+.modal.show{display:flex}
+.dialog{width:100%;max-width:600px;margin:auto;background:#fffaf7;border-radius:24px 24px 0 0;padding:22px 18px 30px}
+.dialog h3{margin:0 0 8px;color:var(--brown)}
+.dialog p{font-size:13px;line-height:1.6;color:#806b64}
+.btns{display:flex;gap:8px}.btns button{flex:1;border:0;border-radius:13px;padding:12px;font-weight:700}
+.primary{background:var(--brown);color:white}.secondary{background:#ead7d2;color:var(--brown)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div><div class="logo">てちょっと</div><div class="sub">手帳がない日の、ちいさなページ</div></div>
+ <div class="count" id="count"></div>
+</header>
+<div class="board" id="board">
+ <div class="palette">
+  <span class="info">付箋</span>
+  <button class="swatch" style="background:#f4c9d1" onclick="addNote('#f4c9d1')"></button>
+  <button class="swatch" style="background:#ead4a7" onclick="addNote('#ead4a7')"></button>
+  <button class="swatch" style="background:#d8cbea" onclick="addNote('#d8cbea')"></button>
+  <button class="swatch" style="background:#c9dfd2" onclick="addNote('#c9dfd2')"></button>
+  <button class="swatch" style="background:#f2dfb8" onclick="addNote('#f2dfb8')"></button>
+  <button class="swatch" style="background:#e6c9ba" onclick="addNote('#e6c9ba')"></button>
+  <button class="add" onclick="addNote('#f4c9d1')">＋</button>
+ </div>
+</div>
+</div>
+
+<div class="modal" id="help">
+ <div class="dialog">
+  <h3>てちょっとの使い方</h3>
+  <p>下の色をタップすると付箋を追加。付箋を指でドラッグすると好きな場所へ移動できます。文字は付箋をタップして入力。配置・文字はこの端末に保存されます。</p>
+  <div class="btns"><button class="primary" onclick="closeHelp()">はじめる</button></div>
+ </div>
+</div>
+
+<script>
+const KEY='techo-sticky-v1';
+let notes=JSON.parse(localStorage.getItem(KEY)||'[]');
+const board=document.getElementById('board');
+const paletteHeight=90;
+
+function save(){localStorage.setItem(KEY,JSON.stringify(notes));updateCount()}
+function updateCount(){document.getElementById('count').textContent=notes.length?notes.length+'枚の付箋':''}
+function addNote(color){
+ const r=board.getBoundingClientRect();
+ const id=crypto.randomUUID();
+ const note={id,color,x:Math.max(10,(r.width-145)/2),y:35+notes.length*12,text:'',rot:(Math.random()*4-2).toFixed(1)};
+ notes.push(note);save();render();
+ setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"] textarea`);el?.focus()},30)
+}
+function removeNote(id){notes=notes.filter(n=>n.id!==id);save();render()}
+function render(){
+ board.querySelectorAll('.sticky').forEach(e=>e.remove());
+ notes.forEach(n=>{
+  const el=document.createElement('div');el.className='sticky';el.dataset.id=n.id;
+  el.style.background=n.color;el.style.left=n.x+'px';el.style.top=n.y+'px';el.style.transform=`rotate(${n.rot}deg)`;
+  el.innerHTML=`<button class="del" aria-label="削除">×</button><textarea placeholder="ここに書く…"></textarea><button class="rotate" aria-label="少し回転">↻</button>`;
+  const ta=el.querySelector('textarea');ta.value=n.text;
+  ta.addEventListener('input',()=>{n.text=ta.value;save()});
+  el.querySelector('.del').onclick=e=>{e.stopPropagation();removeNote(n.id)};
+  el.querySelector('.rotate').onclick=e=>{e.stopPropagation();n.rot=(Number(n.rot)+2)%8-4;save();render()};
+  makeDraggable(el,n);
+  board.appendChild(el);
+ });
+ updateCount();
+}
+function makeDraggable(el,n){
+ let sx,sy,ox,oy,moved=false;
+ const start=(x,y)=>{sx=x;sy=y;ox=n.x;oy=n.y;moved=false;el.style.zIndex=Date.now()%100000};
+ const move=(x,y)=>{const r=board.getBoundingClientRect();n.x=Math.max(-20,Math.min(r.width-100,ox+x-sx));n.y=Math.max(5,Math.min(r.height-105,oy+y-sy));el.style.left=n.x+'px';el.style.top=n.y+'px';moved=true};
+ const end=()=>{if(moved)save()};
+ el.addEventListener('pointerdown',e=>{
+   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='BUTTON')return;
+   e.preventDefault();el.setPointerCapture(e.pointerId);start(e.clientX,e.clientY);
+ });
+ el.addEventListener('pointermove',e=>{if(el.hasPointerCapture(e.pointerId))move(e.clientX,e.clientY)});
+ el.addEventListener('pointerup',end);
+}
+function closeHelp(){document.getElementById('help').classList.remove('show');localStorage.setItem('techo-help','1')}
+render();
+if(!localStorage.getItem('techo-help'))document.getElementById('help').classList.add('show');
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body></html>
