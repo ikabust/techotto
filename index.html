@@ -57,7 +57,7 @@ header{
  font-size:11px;
  color:var(--muted);
 }
-/* 横スクロールするページ部分 */
+/* 横スクロールするページ */
 .pages{
  flex:1;
  overflow-x:auto;
@@ -178,7 +178,7 @@ header{
  color:var(--muted);
  margin-right:3px;
 }
-/* ページ追加ボタン */
+/* ページ追加 */
 .page-add{
  position:absolute;
  right:16px;
@@ -192,7 +192,7 @@ header{
  font-size:11px;
  box-shadow:0 2px 8px #72564b18;
 }
-/* ページ移動ボタン */
+/* ページ移動 */
 .page-nav{
  position:absolute;
  left:50%;
@@ -267,7 +267,6 @@ header{
  </div>
  <div class="page-info" id="pageInfo"></div>
 </header>
-<!-- 横スクロールするページ -->
 <div class="pages" id="pages"></div>
 </div>
 <div class="modal" id="help">
@@ -277,10 +276,12 @@ header{
    下の色をタップすると付箋を追加できます。<br>
    付箋は指でドラッグして好きな場所へ。<br>
    左右にスワイプするとページを移動できます。<br>
-   「＋ページ」で新しいページを追加できます。
+   「＋ ページ」で新しいページを追加できます。
   </p>
   <div class="btns">
-   <button class="primary" onclick="closeHelp()">はじめる</button>
+   <button class="primary" onclick="closeHelp()">
+    はじめる
+   </button>
   </div>
  </div>
 </div>
@@ -304,10 +305,13 @@ let currentPage=data.currentPage || 0;
 /* 保存 */
 function save(){
  data.currentPage=currentPage;
- localStorage.setItem(KEY,JSON.stringify(data));
+ localStorage.setItem(
+  KEY,
+  JSON.stringify(data)
+ );
  updatePageInfo();
 }
-/* ページ情報 */
+/* ページ番号 */
 function updatePageInfo(){
  pageInfo.textContent=
   (currentPage+1)+' / '+data.pages.length;
@@ -324,7 +328,9 @@ function addNote(color){
   x:Math.max(10,(r.width-145)/2),
   y:35+page.notes.length*12,
   text:'',
-  rot:Number((Math.random()*4-2).toFixed(1))
+  rot:Number(
+   (Math.random()*4-2).toFixed(1)
+  )
  };
  page.notes.push(note);
  save();
@@ -340,7 +346,9 @@ function addNote(color){
 function removeNote(id){
  const page=data.pages[currentPage];
  page.notes=
-  page.notes.filter(n=>n.id!==id);
+  page.notes.filter(
+   n=>n.id!==id
+  );
  save();
  render();
 }
@@ -350,12 +358,15 @@ function addPage(){
   id:crypto.randomUUID(),
   notes:[]
  });
- currentPage=data.pages.length-1;
+ currentPage=
+  data.pages.length-1;
  save();
  render();
  setTimeout(()=>{
   pagesEl.scrollTo({
-   left:pagesEl.clientWidth*currentPage,
+   left:
+    pagesEl.clientWidth*
+    currentPage,
    behavior:'smooth'
   });
  },50);
@@ -363,74 +374,94 @@ function addPage(){
 /* ページ描画 */
 function render(){
  pagesEl.innerHTML='';
- data.pages.forEach((page,index)=>{
-  const pageEl=document.createElement('div');
-  pageEl.className='page';
-  pageEl.dataset.page=index;
-  pageEl.innerHTML=`
-   <button
-    class="page-add"
-    onclick="addPage()">
-    ＋ ページ
-   </button>
-   <div class="palette">
-    <span class="info">付箋</span>
+ data.pages.forEach(
+  (page,index)=>{
+   const pageEl=
+    document.createElement('div');
+   pageEl.className='page';
+   pageEl.dataset.page=index;
+   pageEl.innerHTML=`
     <button
-     class="swatch"
-     style="background:#f4c9d1"
-     onclick="addNote('#f4c9d1')">
+     class="page-add"
+     onclick="addPage()">
+     ＋ ページ
     </button>
-    <button
-     class="swatch"
-     style="background:#ead4a7"
-     onclick="addNote('#ead4a7')">
-    </button>
-    <button
-     class="swatch"
-     style="background:#d8cbea"
-     onclick="addNote('#d8cbea')">
-    </button>
-    <button
-     class="swatch"
-     style="background:#c9dfd2"
-     onclick="addNote('#c9dfd2')">
-    </button>
-    <button
-     class="swatch"
-     style="background:#f2dfb8"
-     onclick="addNote('#f2dfb8')">
-    </button>
-    <button
-     class="swatch"
-     style="background:#e6c9ba"
-     onclick="addNote('#e6c9ba')">
-    </button>
-    <button
-     class="add"
-     onclick="addNote('#f4c9d1')">
-     ＋
-    </button>
-   </div>
-   <div class="page-nav">
-    <button onclick="goPage(-1)">‹</button>
-    <button onclick="goPage(1)">›</button>
-   </div>
-  `;
-  page.notes.forEach(note=>{
-   createNoteElement(pageEl,note);
-  });
-  pagesEl.appendChild(pageEl);
- });
+    <div class="palette">
+     <span class="info">
+      付箋
+     </span>
+     <button
+      class="swatch"
+      style="background:#f4c9d1"
+      onclick="addNote('#f4c9d1')">
+     </button>
+     <button
+      class="swatch"
+      style="background:#ead4a7"
+      onclick="addNote('#ead4a7')">
+     </button>
+     <button
+      class="swatch"
+      style="background:#d8cbea"
+      onclick="addNote('#d8cbea')">
+     </button>
+     <button
+      class="swatch"
+      style="background:#c9dfd2"
+      onclick="addNote('#c9dfd2')">
+     </button>
+     <button
+      class="swatch"
+      style="background:#f2dfb8"
+      onclick="addNote('#f2dfb8')">
+     </button>
+     <button
+      class="swatch"
+      style="background:#e6c9ba"
+      onclick="addNote('#e6c9ba')">
+     </button>
+     <button
+      class="add"
+      onclick="addNote('#f4c9d1')">
+      ＋
+     </button>
+    </div>
+    <div class="page-nav">
+     <button onclick="goPage(-1)">
+      ‹
+     </button>
+     <button onclick="goPage(1)">
+      ›
+     </button>
+    </div>
+   `;
+   page.notes.forEach(
+    note=>{
+     createNoteElement(
+      pageEl,
+      note
+     );
+    }
+   );
+   pagesEl.appendChild(pageEl);
+  }
+ );
  updatePageInfo();
 }
-/* 付箋DOM作成 */
-function createNoteElement(pageEl,n){
- const el=document.createElement('div');
+/* 付箋を作る */
+function createNoteElement(
+ pageEl,
+ n
+){
+ const el=
+  document.createElement('div');
  el.className='sticky';
  el.dataset.id=n.id;
  el.style.background=n.color;
- el.style.left=n.x+'px';
- el.style.top=n.y+'px';
+ el.style.left=
+  n.x+'px';
+ el.style.top=
+  n.y+'px';
  el.style.transform=
   `rotate(${n.rot}deg)`;
  el.innerHTML=`
@@ -446,19 +477,21 @@ function createNoteElement(pageEl,n){
 ↻
 `;
 
-const ta=el.querySelector(‘textarea’);
+const ta=
+el.querySelector(‘textarea’);
 
 ta.value=n.text;
 
-ta.addEventListener(‘input’,()=>{
-
+ta.addEventListener(
+‘input’,
+()=>{
 n.text=ta.value;
-
 save();
+}
+);
 
-});
-
-el.querySelector(’.del’).onclick=e=>{
+el.querySelector(’.del’)
+.onclick=e=>{
 
 e.stopPropagation();
 
@@ -466,26 +499,38 @@ removeNote(n.id);
 
 };
 
-el.querySelector(’.rotate’).onclick=e=>{
+el.querySelector(’.rotate’)
+.onclick=e=>{
 
 e.stopPropagation();
 
-n.rot=(Number(n.rot)+2)%8-4;
+n.rot=
+(Number(n.rot)+2)%8-4;
 
 save();
+
 render();
 
 };
 
-makeDraggable(el,n,pageEl);
+makeDraggable(
+el,
+n,
+pageEl
+);
 
 pageEl.appendChild(el);
 }
 
-/* ドラッグ */
-function makeDraggable(el,n,pageEl){
+/* 付箋をドラッグ */
+function makeDraggable(
+el,
+n,
+pageEl
+){
 
-let sx,sy,ox,oy,moved=false;
+let sx,sy,ox,oy;
+let moved=false;
 
 const start=(x,y)=>{
 
@@ -503,7 +548,8 @@ Date.now()%100000;
 
 const move=(x,y)=>{
 
-const r=pageEl.getBoundingClientRect();
+const r=
+pageEl.getBoundingClientRect();
 
 n.x=Math.max(
 -20,
@@ -521,8 +567,11 @@ oy+y-sy
 )
 );
 
-el.style.left=n.x+‘px’;
-el.style.top=n.y+‘px’;
+el.style.left=
+n.x+‘px’;
+
+el.style.top=
+n.y+‘px’;
 
 moved=true;
 };
@@ -542,7 +591,9 @@ e=>{
 if(
 e.target.tagName===‘TEXTAREA’ ||
 e.target.tagName===‘BUTTON’
-)return;
+){
+return;
+}
 
 e.preventDefault();
 
@@ -587,7 +638,8 @@ end
 /* ページ移動 */
 function goPage(direction){
 
-const next=currentPage+direction;
+const next=
+currentPage+direction;
 
 if(
 next<0 ||
@@ -601,40 +653,50 @@ currentPage=next;
 save();
 
 pagesEl.scrollTo({
-left:pagesEl.clientWidth*currentPage,
+
+left:
+pagesEl.clientWidth*
+currentPage,
+
 behavior:‘smooth’
+
 });
 }
 
-/* 横スワイプ後のページ番号更新 */
+/* 横スワイプ */
 let scrollTimer;
 
 pagesEl.addEventListener(
 ‘scroll’,
 ()=>{
 
-clearTimeout(scrollTimer);
-
-scrollTimer=setTimeout(()=>{
-
-const index=Math.round(
-pagesEl.scrollLeft/
-pagesEl.clientWidth
+clearTimeout(
+scrollTimer
 );
 
-if(index!==currentPage){
+scrollTimer=setTimeout(
+()=>{
 
-currentPage=index;
-save();
-
+const index=
+ Math.round(
+  pagesEl.scrollLeft/
+  pagesEl.clientWidth
+ );
+if(
+ index!==currentPage
+){
+ currentPage=index;
+ save();
 }
 
-},80);
+},
+80
+);
 
 }
 );
 
-/* 初回説明 */
+/* 初回説明を閉じる */
 function closeHelp(){
 
 document
@@ -651,7 +713,9 @@ localStorage.setItem(
 render();
 
 if(
-!localStorage.getItem(‘techo-help’)
+!localStorage.getItem(
+‘techo-help’
+)
 ){
 
 document
@@ -661,7 +725,9 @@ document
 }
 
 /* Service Worker */
-if(‘serviceWorker’ in navigator){
+if(
+‘serviceWorker’ in navigator
+){
 
 navigator.serviceWorker
 .register(‘sw.js’)
