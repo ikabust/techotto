@@ -1,5 +1,10 @@
 {
- "name":"てちょっと","short_name":"てちょっと","start_url":"./","display":"standalone",
- "background_color":"#fffaf7","theme_color":"#8f675b","lang":"ja",
- "icons":[]
+  "name": "てちょっと",
+  "short_name": "てちょっと",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f5",
+  "theme_color": "#8ea396",
+  "lang": "ja",
+  "icons": []
 }
