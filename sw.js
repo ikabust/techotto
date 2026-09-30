@@ -1,4 +1,4 @@
-const CACHE_NAME = 'techo-pwa-v2'; // ← コード更新時はここを v2, v3... と書き換える！
+const CACHE_NAME = 'techo-pwa-v3'; // ← コード更新時はここを v2, v3... と書き換える！
 
 const ASSETS = [
   './',
