@@ -549,6 +549,13 @@ if(!localStorage.getItem("techo-help")){
 if("serviceWorker" in navigator){
  navigator.serviceWorker.register("sw.js").catch(() => {});
 }
+
 </script>
+<!-- HTMLのどこか（モーダル内など）に追加 -->
+<div class="backup-btns" style="margin-top: 15px; display: flex; gap: 8px;">
+  <button type="button" onclick="exportData()" style="font-size: 11px; padding: 6px;">バックアップ保存</button>
+  <button type="button" onclick="importData()" style="font-size: 11px; padding: 6px;">復元</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="loadImportFile(event)">
+</div>
 </body>
 </html>
