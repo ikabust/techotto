@@ -291,18 +291,18 @@ header{
    左右にスワイプするとページを移動できます。<br>
    「＋ ページ」で新しいページを追加できます。
   </p>
+  </div>
+  <div class="backup-btns" style="margin-top: 15px; display: flex; gap: 8px;">
+    <button type="button" onclick="exportData()" style="font-size: 11px; padding: 6px;">バックアップ保存</button>
+    <button type="button" onclick="importData()" style="font-size: 11px; padding: 6px;">復元</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="loadImportFile(event)">
+  </div>
   <div class="btns">
    <button class="primary" onclick="closeHelp()">
     はじめる
    </button>
   </div>
  </div>
-</div>
-<div class="backup-btns" style="margin-top: 15px; display: flex; gap: 8px;">
-  <button type="button" onclick="exportData()" style="font-size: 11px; padding: 6px;">バックアップ保存</button>
-  <button type="button" onclick="importData()" style="font-size: 11px; padding: 6px;">復元</button>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="loadImportFile(event)">
-</div>
 <script src="app.js"></script>
 </body>
 </html>
