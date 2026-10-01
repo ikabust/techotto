@@ -1,24 +1,30 @@
-const CACHE_NAME = 'techo-pwa-v8';
+const CACHE_NAME = 'techo-pwa-v9';
 
-// アプリで使っているファイル群（新しく作成した style.css を追加）
+// オフライン時に必要な全リソース
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
+  './読書猫さん.png',
   './メモのイラスト.jpg'
 ];
 
-// インストール時にキャッシュ
+// インストール時に全ファイルをキャッシュ保存
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => {
+      // 一部の画像が見つからなくてもインストール失敗しないように個別に追加
+      return Promise.allSettled(
+        ASSETS.map(url => cache.add(url).catch(err => console.warn(`Failed to cache: ${url}`, err)))
+      );
+    })
   );
 });
 
-// 有効化時に古いキャッシュを削除
+// 古いキャッシュをクリア
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
@@ -33,9 +39,27 @@ self.addEventListener('activate', e => {
   );
 });
 
-// リクエスト処理（ネットワーク優先、オフライン時はキャッシュから取得）
+// リクエスト処理：まずキャッシュから探し、無ければネットワークへ（Cache First）
 self.addEventListener('fetch', e => {
+  // HTTP / HTTPS 以外のスキーム（chrome-extension等）は無視
+  if (!e.request.url.startsWith('http')) return;
+
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    caches.match(e.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse; // キャッシュがあればそれを返す（オフラインOK）
+      }
+      return fetch(e.request).then(response => {
+        // 取得成功したら必要に応じてキャッシュに追加
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(e.request, responseToCache);
+        });
+        return response;
+      });
+    })
   );
 });
