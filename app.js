@@ -281,10 +281,12 @@ function createNoteElement(pageEl, n){
   el.style.left = n.x + 'px';
   el.style.top = n.y + 'px';
   el.style.transform = `rotate(${n.rot}deg)`;
+  
+  // コピーボタンの表示を「❐」に変更
   el.innerHTML = `
     <button type="button" class="del" aria-label="削除">×</button>
     <textarea placeholder="ここに書く…"></textarea>
-    <button type="button" class="copy" aria-label="コピー" title="複製">📋</button>
+    <button type="button" class="copy" aria-label="コピー" title="複製">❐</button>
     <button type="button" class="rotate" aria-label="回転">↻</button>
   `;
 

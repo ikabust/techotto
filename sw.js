@@ -1,16 +1,13 @@
-const CACHE_NAME = 'techo-pwa-v7';
+const CACHE_NAME = 'techo-pwa-v8';
 
-// アプリで使っているCSSや外部JS、画像等があればここに追加してください
+// アプリで使っているファイル群（新しく作成した style.css を追加）
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
+  './style.css',
   './app.js',
+  './manifest.json',
   './メモのイラスト.jpg'
-  // CSSや別JSがある場合は以下のように追加してください
-  // './style.css',
-  // './app.js'
-
 ];
 
 // インストール時にキャッシュ
