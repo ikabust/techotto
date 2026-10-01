@@ -310,3 +310,7 @@ if(!localStorage.getItem("techo-help")){
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
+/* 使い方を開く関数を末尾に追加 */
+function openHelp(){
+  document.getElementById("help").classList.add("show");
+}
