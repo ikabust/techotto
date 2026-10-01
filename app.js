@@ -314,3 +314,10 @@ if("serviceWorker" in navigator){
 function openHelp(){
   document.getElementById("help").classList.add("show");
 }
+/* app.js の一番最後 */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    // 常に新しいSWがないかチェックする
+    reg.update();
+  }).catch(() => {});
+}
