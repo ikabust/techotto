@@ -1,4 +1,4 @@
-const KEY = 'techo-sticky-pages-v1';
+const KEY = 'techo-sticky-pages-v2';
 
 // エクスポート機能
 function exportData() {
