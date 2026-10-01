@@ -1,5 +1,12 @@
 const KEY = 'techo-sticky-pages-v2';
 
+// ----------------------------------------------------
+// 削除の取り消し（元に戻す）用変数
+// ----------------------------------------------------
+let lastDeletedNote = null;
+let lastDeletedPageIndex = null;
+let toastTimer = null;
+
 // エクスポート機能
 function exportData() {
   const jsonStr = JSON.stringify(data, null, 2);
@@ -123,12 +130,97 @@ function addNote(color){
   }, 30);
 }
 
-/* 付箋削除 */
+/* 付箋複製（コピー） */
+function duplicateNote(noteData){
+  const page = data.pages[currentPage];
+  if (!page) return;
+
+  const pageEl = pagesEl.children[currentPage] || pagesEl;
+  const r = pageEl.getBoundingClientRect();
+
+  const newId = generateUUID();
+  const newNote = {
+    ...JSON.parse(JSON.stringify(noteData)),
+    id: newId,
+    x: Math.min(r.width - 100, noteData.x + 15), // 少しずらして配置
+    y: noteData.y + 15
+  };
+
+  page.notes.push(newNote);
+  save();
+  render();
+}
+
+/* 付箋削除（元に戻すバックアップ付き） */
 function removeNote(id){
   const page = data.pages[currentPage];
+  const targetNote = page.notes.find(n => n.id === id);
+  if (!targetNote) return;
+
+  // 削除前のデータをバックアップ
+  lastDeletedNote = JSON.parse(JSON.stringify(targetNote));
+  lastDeletedPageIndex = currentPage;
+
   page.notes = page.notes.filter(n => n.id !== id);
   save();
   render();
+
+  // 「元に戻す」通知を表示
+  showUndoToast();
+}
+
+/* 削除した付箋を元に戻す */
+function undoDelete(){
+  if (!lastDeletedNote || lastDeletedPageIndex === null) return;
+  
+  if (data.pages[lastDeletedPageIndex]) {
+    data.pages[lastDeletedPageIndex].notes.push(lastDeletedNote);
+    save();
+    render();
+  }
+
+  lastDeletedNote = null;
+  lastDeletedPageIndex = null;
+
+  const toast = document.getElementById("undoToast");
+  if (toast) toast.style.display = "none";
+}
+
+/* 「元に戻す」通知バー（トースト）表示 */
+function showUndoToast(){
+  let toast = document.getElementById("undoToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "undoToast";
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #745247;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 100;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML = `
+    <span>付箋を削除しました</span>
+    <button type="button" onclick="undoDelete()" style="background:none; border:none; color:#f8d2bd; font-weight:bold; cursor:pointer; padding:0;">元に戻す ↩</button>
+  `;
+  toast.style.display = "flex";
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.style.display = "none";
+  }, 5000);
 }
 
 /* ページ追加 */
@@ -192,6 +284,7 @@ function createNoteElement(pageEl, n){
   el.innerHTML = `
     <button type="button" class="del" aria-label="削除">×</button>
     <textarea placeholder="ここに書く…"></textarea>
+    <button type="button" class="copy" aria-label="コピー" title="複製">📋</button>
     <button type="button" class="rotate" aria-label="回転">↻</button>
   `;
 
@@ -206,6 +299,12 @@ function createNoteElement(pageEl, n){
   el.querySelector(".del").onclick = e => {
     e.stopPropagation();
     removeNote(n.id);
+  };
+
+  // コピーボタンのクリックイベント
+  el.querySelector(".copy").onclick = e => {
+    e.stopPropagation();
+    duplicateNote(n);
   };
 
   el.querySelector(".rotate").onclick = e => {
@@ -299,6 +398,11 @@ function closeHelp(){
   localStorage.setItem("techo-help", "1");
 }
 
+/* 使い方を開く */
+function openHelp(){
+  document.getElementById("help").classList.add("show");
+}
+
 /* 起動 */
 render();
 
@@ -306,18 +410,9 @@ if(!localStorage.getItem("techo-help")){
   document.getElementById("help").classList.add("show");
 }
 
-/* Service Worker の登録 */
+/* Service Worker の登録と自動更新設定 */
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").catch(() => {});
-}
-/* 使い方を開く関数を末尾に追加 */
-function openHelp(){
-  document.getElementById("help").classList.add("show");
-}
-/* app.js の一番最後 */
-if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").then(reg => {
-    // 常に新しいSWがないかチェックする
     reg.update();
   }).catch(() => {});
 }

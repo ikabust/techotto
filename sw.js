@@ -1,4 +1,4 @@
-const CACHE_NAME = 'techo-pwa-v6';
+const CACHE_NAME = 'techo-pwa-v7';
 
 // アプリで使っているCSSや外部JS、画像等があればここに追加してください
 const ASSETS = [
